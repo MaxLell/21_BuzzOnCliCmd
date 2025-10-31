@@ -4,6 +4,3 @@
 [submodule "Utils/EmbeddedUtils"]
 	path = Utils/EmbeddedUtils
 	url = https://github.com/MaxLell/embedded_utils.git
-[submodule "User_App/DataModel"]
-	path = User_App/DataModel
-	url = https://github.com/MaxLell/DataModel.git
