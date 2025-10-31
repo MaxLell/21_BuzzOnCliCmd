@@ -12,9 +12,8 @@
 #include "../../Utils/EmbeddedCli/src/Cli.h"
 #include "../../Utils/EmbeddedUtils/utils/custom_assert.h"
 #include "../BlinkyLed/BlinkyLed.h"
+#include "../CliBinding/CliBinding.h"
 #include "../Console/Console.h"
-
-extern int clicmd_led_set_fn(int argc, char* argv[], void* context);
 
 void assertion(const char* file, uint32_t line, const char* expr)
 {
@@ -46,15 +45,6 @@ static void prv_init()
 
     // Initialize the cli
     cli_init(&cli_cfg, console_putchar);
-
-    // Register the command
-    cli_binding_t led_cmd = {
-        .name = "led_set",
-        .help = "Set the state of the LED: led_set 'on' / 'off'",
-        .cmd_fn = clicmd_led_set_fn,
-        .context = &led,
-    };
-    cli_register(&led_cmd);
 }
 
 static void prv_loop() { cli_process(); }
