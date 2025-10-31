@@ -41,7 +41,7 @@ static bool prv_delay_elapsed(delay_non_blocking_cfg_t* delay);
 void buzzer_init(void)
 {
     // Assert that the Sys-Clock is 4MHz
-    // otherwise the following algorithm does not work
+    // otherwise the following implementation does not work
     u32 sysclock_freq_Hz = HAL_RCC_GetSysClockFreq();
     ASSERT(4000000 == sysclock_freq_Hz);
 
@@ -53,6 +53,10 @@ void buzzer_init(void)
     htim3.Instance->PSC = TIM3_PRESCALER;
 
     // Setup the PAM8904 Driver - see page 5 of the datasheet
+    // https://www.mikroe.com/buzz-3-click
+    // https://download.mikroe.com/documents/add-on-boards/click/buzz_3_click/buzz-3-click-schematic-v100.pdf
+    // https://download.mikroe.com/documents/datasheets/PAM8904_datasheet.pdf
+
     HAL_GPIO_WritePin(BUZZER_EN1_GPIO_Port, BUZZER_EN1_Pin, GPIO_PIN_RESET);
     HAL_GPIO_WritePin(BUZZER_EN2_GPIO_Port, BUZZER_EN2_Pin, GPIO_PIN_SET);
 }
