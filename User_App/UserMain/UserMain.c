@@ -26,21 +26,21 @@ static void prv_init()
 
     // Initialize the Console
     // (the hw interface for the cli)
-    console_init(cli_receive);
+    // console_init(cli_receive);
 
     // Initialize the cli
-    cli_init(&cli_cfg, console_putchar);
+    // cli_init(&cli_cfg, console_putchar);
 
     // Initialize the Buzzer
     buzzer_init();
 
     // Initialize the cli cmds
-    clibinding_register_cmds();
+    // clibinding_register_cmds();
 }
 
 static void prv_loop()
 { // All the action only happens in the cli commands
-    cli_process();
+    // cli_process();
 }
 
 void user_main(void)
