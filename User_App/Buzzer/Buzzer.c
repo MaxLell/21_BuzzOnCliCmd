@@ -6,13 +6,6 @@
 #include "../../Utils/EmbeddedUtils/utils/custom_types.h"
 
 // #####################################################
-// Defines
-// #####################################################
-#define TIM3_PRESCALER (4U)
-
-// #####################################################
-// private typedefs
-// #####################################################
 typedef struct
 {
     u32 start_tick_ctr;
@@ -22,11 +15,21 @@ typedef struct
 // #####################################################
 // private variables
 // #####################################################
-extern TIM_HandleTypeDef htim3;
+extern TIM_HandleTypeDef htim1;
 static bool is_initialized = false;
 static bool is_playing_tone = false;
 static delay_non_blocking_cfg_t delay_tone;
 static delay_non_blocking_cfg_t delay_freq;
+
+// #####################################################
+// Defines
+// #####################################################
+#define BUZZER_TIM_PRESCALER (3)
+#define BUZZER_TIM_HANDLE    (htim1)
+#define BUZZER_TIM_CHANNEL   (TIM_CHANNEL_3)
+
+// #####################################################
+// private typedefs
 
 // #####################################################
 // private functions
@@ -48,7 +51,7 @@ void buzzer_init(void)
     is_playing_tone = false;
 
     // Setup the Prescaler for the timer
-    htim3.Instance->PSC = TIM3_PRESCALER;
+    __HAL_TIM_PRESCALER(&BUZZER_TIM_HANDLE, BUZZER_TIM_PRESCALER);
 
     // Setup the PAM8904 Driver - see page 5 of the datasheet
     // https://www.mikroe.com/buzz-3-click
@@ -57,6 +60,9 @@ void buzzer_init(void)
 
     HAL_GPIO_WritePin(BUZZER_EN1_GPIO_Port, BUZZER_EN1_Pin, GPIO_PIN_RESET);
     HAL_GPIO_WritePin(BUZZER_EN2_GPIO_Port, BUZZER_EN2_Pin, GPIO_PIN_SET);
+
+    HAL_StatusTypeDef status = HAL_TIM_PWM_Start(&BUZZER_TIM_HANDLE, BUZZER_TIM_CHANNEL);
+    ASSERT(HAL_OK == status);
 }
 
 void buzzer_play_note(const char* note, const u32 duration_ms)
@@ -70,7 +76,7 @@ void buzzer_mute(void)
 {
     ASSERT(is_initialized);
     // Stop the PWM Signal generation
-    HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_3);
+    HAL_TIM_PWM_Stop(&BUZZER_TIM_HANDLE, BUZZER_TIM_CHANNEL);
 
     is_playing_tone = false;
 
@@ -91,14 +97,16 @@ void buzzer_play_sound(const u32 tone_frequency_Hz, const u32 duration_ms)
     }
     // Setup the PWM Timer
     u32 arr_value = prv_calculate_timer_ARR_value(tone_frequency_Hz);
-    u32 ccr_value = arr_value / 2;    // 50% Dutycycle
-    htim3.Instance->ARR = arr_value;  // Timer counter value
-    htim3.Instance->CCR1 = ccr_value; // Capture Compare Register
+    u32 ccr_value = arr_value / 2; // 50% Dutycycle
+    __HAL_TIM_SET_AUTORELOAD(&BUZZER_TIM_HANDLE, arr_value);
+    __HAL_TIM_SET_COMPARE(&BUZZER_TIM_HANDLE, BUZZER_TIM_CHANNEL, ccr_value);
 
     // Play the sound
-    HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+    HAL_StatusTypeDef status = HAL_TIM_PWM_Start(&BUZZER_TIM_HANDLE, BUZZER_TIM_CHANNEL);
+    ASSERT(HAL_OK == status);
     HAL_Delay(duration_ms);
-    HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
+    status = HAL_TIM_PWM_Stop(&BUZZER_TIM_HANDLE, BUZZER_TIM_CHANNEL);
+    ASSERT(HAL_OK == status);
 }
 
 // #####################################################
