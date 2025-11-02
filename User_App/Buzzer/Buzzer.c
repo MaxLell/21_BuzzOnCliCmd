@@ -32,8 +32,6 @@ static delay_non_blocking_cfg_t delay_freq;
 // private functions
 // #####################################################
 static u32 prv_calculate_timer_ARR_value(u32 freq_Hz);
-static void prv_delay_start(delay_non_blocking_cfg_t* delay, u32 ms);
-static bool prv_delay_elapsed(delay_non_blocking_cfg_t* delay);
 
 // #####################################################
 // public function implementation
@@ -82,7 +80,7 @@ void buzzer_mute(void)
     delay_tone.start_tick_ctr = 0;
 }
 
-void buzzer_play_tone(const u32 tone_frequency_Hz, const u32 duration_ms)
+void buzzer_play_sound(const u32 tone_frequency_Hz, const u32 duration_ms)
 {
     { // Input Checks
         ASSERT(tone_frequency_Hz < 2000);
@@ -91,30 +89,16 @@ void buzzer_play_tone(const u32 tone_frequency_Hz, const u32 duration_ms)
         ASSERT(duration_ms < 10000);
         ASSERT(is_initialized);
     }
-    if (!is_playing_tone)
-    {
-        is_playing_tone = true;
+    // Setup the PWM Timer
+    u32 arr_value = prv_calculate_timer_ARR_value(tone_frequency_Hz);
+    u32 ccr_value = arr_value / 2;    // 50% Dutycycle
+    htim3.Instance->ARR = arr_value;  // Timer counter value
+    htim3.Instance->CCR1 = ccr_value; // Capture Compare Register
 
-        // Start the non-blocking delay
-        prv_delay_start(&delay_freq, duration_ms);
-
-        // Setup the PWM Timer
-        u32 arr_value = prv_calculate_timer_ARR_value(tone_frequency_Hz);
-        u32 ccr_value = arr_value / 2;    // 50% Dutycycle
-        htim3.Instance->ARR = arr_value;  // Timer counter value
-        htim3.Instance->CCR1 = ccr_value; // Capture Compare Register
-        HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
-    }
-    else
-    {
-        bool timer_elapsed = prv_delay_elapsed(&delay_freq);
-        if (timer_elapsed)
-        {
-            // reset the sequence
-            is_playing_tone = false;
-            HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_3);
-        }
-    }
+    // Play the sound
+    HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+    HAL_Delay(duration_ms);
+    HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
 }
 
 // #####################################################
@@ -127,17 +111,4 @@ static u32 prv_calculate_timer_ARR_value(u32 freq_Hz)
     u32 tmp_ARR_value = 0;
     tmp_ARR_value = (1 * 1000 * 1000) / freq_Hz;
     return tmp_ARR_value;
-}
-
-static void prv_delay_start(delay_non_blocking_cfg_t* delay, u32 ms)
-{
-    ASSERT(delay);
-    delay->start_tick_ctr = HAL_GetTick();
-    delay->duration_ms = ms;
-}
-
-static bool prv_delay_elapsed(delay_non_blocking_cfg_t* delay)
-{
-    ASSERT(delay);
-    return (HAL_GetTick() - delay->start_tick_ctr) >= delay->duration_ms;
 }
