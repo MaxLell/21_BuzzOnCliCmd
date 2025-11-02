@@ -6,32 +6,30 @@
  */
 
 #include "BlinkyLed.h"
+#include "../../Core/Inc/gpio.h"
 #include "../../Core/Inc/main.h"
+#include "../../Utils/EmbeddedUtils/utils/custom_assert.h"
+#include "../../Utils/EmbeddedUtils/utils/custom_types.h"
 
-void BlinkyLed_VerifyArguments(blinky_led_cfg_t* inout_cfg)
+#define LED_ON  1
+#define LED_OFF 0
+
+static u8 led_state = 0;
+
+void blinkyled_enable()
 {
-    ASSERT(inout_cfg);
-    ASSERT(inout_cfg->gpio_port);
-    ASSERT(inout_cfg->led_state <= E_BLINKY_LED_ON);
+    HAL_GPIO_WritePin(BLINKY_LED_GPIO_Port, BLINKY_LED_Pin, GPIO_PIN_SET);
+    led_state = LED_ON;
 }
 
-void blinkyled_enable(blinky_led_cfg_t* inout_cfg)
+void blinkyled_disable()
 {
-    BlinkyLed_VerifyArguments(inout_cfg);
-    HAL_GPIO_WritePin((GPIO_TypeDef*)inout_cfg->gpio_port, (u16)inout_cfg->gpio_pin, GPIO_PIN_SET);
-    inout_cfg->led_state = E_BLINKY_LED_ON;
+    HAL_GPIO_WritePin(BLINKY_LED_GPIO_Port, BLINKY_LED_Pin, GPIO_PIN_RESET);
+    led_state = LED_OFF;
 }
 
-void blinkyled_disable(blinky_led_cfg_t* inout_cfg)
+void blinkyled_toggle()
 {
-    BlinkyLed_VerifyArguments(inout_cfg);
-    HAL_GPIO_WritePin((GPIO_TypeDef*)inout_cfg->gpio_port, (u16)inout_cfg->gpio_pin, GPIO_PIN_RESET);
-    inout_cfg->led_state = E_BLINKY_LED_OFF;
-}
-
-void blinkyled_toggle(blinky_led_cfg_t* inout_cfg)
-{
-    BlinkyLed_VerifyArguments(inout_cfg);
-    inout_cfg->led_state = !inout_cfg->led_state;
-    HAL_GPIO_WritePin((GPIO_TypeDef*)inout_cfg->gpio_port, (u16)inout_cfg->gpio_pin, (int)inout_cfg->led_state);
+    led_state = !led_state;
+    HAL_GPIO_WritePin(BLINKY_LED_GPIO_Port, BLINKY_LED_Pin, led_state);
 }
