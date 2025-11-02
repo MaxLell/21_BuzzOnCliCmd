@@ -11,7 +11,7 @@
 #include "../../Core/Inc/main.h"
 #include "../../Utils/EmbeddedCli/src/Cli.h"
 #include "../../Utils/EmbeddedUtils/utils/custom_assert.h"
-#include "../BlinkyLed/BlinkyLed.h"
+#include "../Buzzer/Buzzer.h"
 #include "../CliBinding/CliBinding.h"
 #include "../Console/Console.h"
 
@@ -25,8 +25,6 @@ void assertion(const char* file, uint32_t line, const char* expr)
     }
 }
 
-static blinky_led_cfg_t led;
-
 static cli_cfg_t cli_cfg;
 
 static void prv_init()
@@ -34,20 +32,24 @@ static void prv_init()
     // initialize the asserts
     custom_assert_init(assertion);
 
-    // Initialize the led
-    led.gpio_port = BLINKY_LED_GPIO_Port;
-    led.gpio_pin = BLINKY_LED_Pin;
-    led.led_state = E_BLINKY_LED_OFF;
-
     // Initialize the Console
     // (the hw interface for the cli)
     console_init(cli_receive);
 
     // Initialize the cli
     cli_init(&cli_cfg, console_putchar);
+
+    // Initialize the Buzzer
+    buzzer_init();
+
+    // Initialize the cli cmds
+    clibinding_register_cmds();
 }
 
-static void prv_loop() { cli_process(); }
+static void prv_loop()
+{ // All the action only happens in the cli commands
+    cli_process();
+}
 
 void user_main(void)
 {
