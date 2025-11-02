@@ -15,22 +15,14 @@
 #include "../CliBinding/CliBinding.h"
 #include "../Console/Console.h"
 
-void assertion(const char* file, uint32_t line, const char* expr)
-{
-    cli_print("Assertion failed in file %s on line %lu: %s\r\n", file, line, expr);
-    // Add a breakpoint here for debugging
-    __asm("BKPT #0");
-    while (1)
-    {
-    }
-}
+static void prv_assertion(const char* file, uint32_t line, const char* expr);
 
 static cli_cfg_t cli_cfg;
 
 static void prv_init()
 {
     // initialize the asserts
-    custom_assert_init(assertion);
+    custom_assert_init(prv_assertion);
 
     // Initialize the Console
     // (the hw interface for the cli)
@@ -60,6 +52,16 @@ void user_main(void)
     for (;;)
     {
         prv_loop();
+    }
+}
+
+static void prv_assertion(const char* file, uint32_t line, const char* expr)
+{
+    cli_print("Assertion failed in file %s on line %lu: %s\r\n", file, line, expr);
+    // Add a breakpoint here for debugging
+    __asm("BKPT #0");
+    while (1)
+    {
     }
 }
 
