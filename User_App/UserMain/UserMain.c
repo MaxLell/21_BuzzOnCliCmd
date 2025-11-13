@@ -40,7 +40,7 @@ static void prv_init()
 
 static void prv_loop()
 { // All the action only happens in the cli commands
-    // cli_process();
+     cli_process();
 }
 
 void user_main(void)

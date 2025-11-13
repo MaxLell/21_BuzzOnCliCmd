@@ -61,8 +61,8 @@ void buzzer_init(void)
     HAL_GPIO_WritePin(BUZZER_EN1_GPIO_Port, BUZZER_EN1_Pin, GPIO_PIN_RESET);
     HAL_GPIO_WritePin(BUZZER_EN2_GPIO_Port, BUZZER_EN2_Pin, GPIO_PIN_SET);
 
-//    HAL_StatusTypeDef status = HAL_TIM_PWM_Start(&BUZZER_TIM_HANDLE, BUZZER_TIM_CHANNEL);
-//    ASSERT(HAL_OK == status);
+    //    HAL_StatusTypeDef status = HAL_TIM_PWM_Start(&BUZZER_TIM_HANDLE, BUZZER_TIM_CHANNEL);
+    //    ASSERT(HAL_OK == status);
 }
 
 void buzzer_play_note(const char* note, const u32 duration_ms)
@@ -90,11 +90,18 @@ void buzzer_play_sound(const u32 tone_frequency_Hz, const u32 duration_ms)
 {
     { // Input Checks
         ASSERT(tone_frequency_Hz < 2000);
-        ASSERT(tone_frequency_Hz > 100);
         ASSERT(duration_ms >= 1);
         ASSERT(duration_ms < 10000);
         ASSERT(is_initialized);
     }
+
+    if (tone_frequency_Hz == 0)
+    {
+        // REST - just wait for the duration
+        HAL_Delay(duration_ms);
+        return;
+    }
+
     // Setup the PWM Timer
     u32 arr_value = prv_calculate_timer_ARR_value(tone_frequency_Hz);
     u32 ccr_value = arr_value / 2; // 50% Dutycycle
