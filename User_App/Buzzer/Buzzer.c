@@ -61,8 +61,8 @@ void buzzer_init(void)
     HAL_GPIO_WritePin(BUZZER_EN1_GPIO_Port, BUZZER_EN1_Pin, GPIO_PIN_RESET);
     HAL_GPIO_WritePin(BUZZER_EN2_GPIO_Port, BUZZER_EN2_Pin, GPIO_PIN_SET);
 
-    HAL_StatusTypeDef status = HAL_TIM_PWM_Start(&BUZZER_TIM_HANDLE, BUZZER_TIM_CHANNEL);
-    ASSERT(HAL_OK == status);
+//    HAL_StatusTypeDef status = HAL_TIM_PWM_Start(&BUZZER_TIM_HANDLE, BUZZER_TIM_CHANNEL);
+//    ASSERT(HAL_OK == status);
 }
 
 void buzzer_play_note(const char* note, const u32 duration_ms)
