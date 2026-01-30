@@ -6,7 +6,6 @@ extern "C"
 {
 #endif
 
-
     void clibinding_register_cmds(void);
 
 #ifdef __cplusplus
